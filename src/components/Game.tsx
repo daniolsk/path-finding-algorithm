@@ -1,0 +1,358 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+
+type cellType = {
+	x: number;
+	y: number;
+	type: 'wall' | 'empty' | 'path' | 'start' | 'finish';
+};
+
+const gridTemplate: (string | number)[][] = [
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+];
+
+const boardTemplate: cellType[] = [];
+
+for (let i = 0; i < 15; i++) {
+	for (let j = 0; j < 15; j++) {
+		boardTemplate.push({ y: i, x: j, type: 'empty' });
+	}
+}
+
+const Game = () => {
+	const [board, setBoard] = useState(boardTemplate);
+	const [action, setAction] = useState<'finish' | 'start'>('start');
+
+	const [changed, setChanged] = useState(false);
+
+	const [isStartSet, setIsStartSet] = useState(false);
+	const [isFinishSet, setIsFinishSet] = useState(false);
+
+	useEffect(() => {
+		calculatePath();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [changed]);
+
+	const calculatePath = () => {
+		if (!(isFinishSet && isStartSet)) return;
+
+		const grid = gridTemplate;
+
+		let endX: number = 0,
+			endY: number = 0;
+
+		board.forEach((cell) => {
+			switch (cell.type) {
+				case 'empty':
+					grid[cell.y][cell.x] = 0;
+					break;
+				case 'start':
+					grid[cell.y][cell.x] = 'S';
+					break;
+				case 'finish':
+					endX = cell.x;
+					endY = cell.y;
+					grid[cell.y][cell.x] = 'M';
+					break;
+				case 'wall':
+					grid[cell.y][cell.x] = -3;
+					break;
+				case 'path':
+					grid[cell.y][cell.x] = 0;
+					break;
+				default:
+					break;
+			}
+		});
+
+		let ended: boolean = false;
+		let failed: boolean = false;
+		let pathLevel: number = 0;
+
+		while (!ended) {
+			pathLevel = pathLevel + 1;
+
+			if (pathLevel > 100) {
+				ended = true;
+
+				setBoard((prevBoard) => {
+					const newBoard: cellType[] = prevBoard.map((cell) => {
+						if (cell.type == 'path') {
+							return { ...cell, type: 'empty' };
+						} else {
+							return cell;
+						}
+					});
+					return newBoard;
+				});
+
+				failed = true;
+			}
+
+			for (let i = 0; i < 15; i++) {
+				for (let j = 0; j < 15; j++) {
+					if (pathLevel == 1) {
+						if (grid[i][j] == 'S') {
+							if (
+								(grid[i - 1] && grid[i - 1][j] == 'M') ||
+								(grid[i + 1] && grid[i + 1][j] == 'M') ||
+								grid[i][j - 1] == 'M' ||
+								grid[i][j + 1] == 'M'
+							) {
+								ended = true;
+							} else {
+								if (grid[i - 1] && grid[i - 1][j] == 0) {
+									grid[i - 1][j] = pathLevel;
+								}
+								if (grid[i + 1] && grid[i + 1][j] == 0) {
+									grid[i + 1][j] = pathLevel;
+								}
+								if (grid[i][j - 1] == 0) {
+									grid[i][j - 1] = pathLevel;
+								}
+								if (grid[i][j + 1] == 0) {
+									grid[i][j + 1] = pathLevel;
+								}
+							}
+						}
+					} else {
+						if (grid[i][j] == pathLevel - 1) {
+							if (
+								(grid[i - 1] && grid[i - 1][j] == 'M') ||
+								(grid[i + 1] && grid[i + 1][j] == 'M') ||
+								grid[i][j - 1] == 'M' ||
+								grid[i][j + 1] == 'M'
+							) {
+								ended = true;
+							} else {
+								if (grid[i - 1] && grid[i - 1][j] == 0) {
+									grid[i - 1][j] = pathLevel;
+								}
+								if (grid[i + 1] && grid[i + 1][j] == 0) {
+									grid[i + 1][j] = pathLevel;
+								}
+								if (grid[i][j - 1] == 0) {
+									grid[i][j - 1] = pathLevel;
+								}
+								if (grid[i][j + 1] == 0) {
+									grid[i][j + 1] = pathLevel;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (!failed) {
+			let RoadLenght: number;
+			let pathRednerEnded: boolean = false;
+			let pathRenderLevel: number = 0;
+
+			let currnetX: number = endX;
+			let currnetY: number = endY;
+
+			if (grid[currnetY - 1] && grid[currnetY - 1][currnetX] == pathLevel) {
+				pathRenderLevel = pathLevel;
+			}
+			if (grid[currnetY + 1] && grid[currnetY + 1][currnetX] == pathLevel) {
+				pathRenderLevel = pathLevel;
+			}
+			if (grid[currnetY][currnetX - 1] == pathLevel) {
+				pathRenderLevel = pathLevel;
+			}
+			if (grid[currnetY][currnetX + 1] == pathLevel) {
+				pathRenderLevel = pathLevel;
+			}
+			if (grid[currnetY - 1] && grid[currnetY - 1][currnetX] == pathLevel - 1) {
+				pathRenderLevel = pathLevel - 1;
+			}
+			if (grid[currnetY + 1] && grid[currnetY + 1][currnetX] == pathLevel - 1) {
+				pathRenderLevel = pathLevel - 1;
+			}
+			if (grid[currnetY][currnetX - 1] == pathLevel - 1) {
+				pathRenderLevel = pathLevel - 1;
+			}
+			if (grid[currnetY][currnetX + 1] == pathLevel - 1) {
+				pathRenderLevel = pathLevel - 1;
+			}
+
+			RoadLenght = pathRenderLevel + 1;
+
+			const pathList: { x: number; y: number }[] = [];
+
+			while (!pathRednerEnded) {
+				if (grid[currnetY - 1] && grid[currnetY - 1][currnetX] == pathRenderLevel) {
+					//document.querySelector(`[x="${currnetX}"][y="${currnetY - 1}"]`).classList.add('path');
+					pathList.push({ x: currnetX, y: currnetY - 1 });
+					currnetX = currnetX;
+					currnetY = currnetY - 1;
+					pathRenderLevel--;
+				} else if (grid[currnetY + 1] && grid[currnetY + 1][currnetX] == pathRenderLevel) {
+					//document.querySelector(`[x="${currnetX}"][y="${currnetY + 1}"]`).classList.add('path');
+					pathList.push({ x: currnetX, y: currnetY + 1 });
+					currnetX = currnetX;
+					currnetY = currnetY + 1;
+					pathRenderLevel--;
+				} else if (grid[currnetY][currnetX - 1] == pathRenderLevel) {
+					//document.querySelector(`[x="${currnetX - 1}"][y="${currnetY}"]`).classList.add('path');
+					pathList.push({ x: currnetX - 1, y: currnetY });
+					currnetX = currnetX - 1;
+					currnetY = currnetY;
+					pathRenderLevel--;
+				} else if (grid[currnetY][currnetX + 1] == pathRenderLevel) {
+					//document.querySelector(`[x="${currnetX + 1}"][y="${currnetY}"]`).classList.add('path');
+					pathList.push({ x: currnetX + 1, y: currnetY });
+					currnetX = currnetX + 1;
+					currnetY = currnetY;
+					pathRenderLevel--;
+				}
+
+				if (pathRenderLevel == 0) {
+					pathRednerEnded = true;
+				}
+			}
+
+			setBoard((prevBoard) => {
+				const newBoard: cellType[] = prevBoard.map((cell) => {
+					if (pathList.find((obj: { x: number; y: number }) => obj.x == cell.x && obj.y == cell.y)) {
+						return { ...cell, type: 'path' };
+					} else if (cell.type == 'path') {
+						return { ...cell, type: 'empty' };
+					} else {
+						return cell;
+					}
+				});
+				return newBoard;
+			});
+		}
+	};
+
+	const setWallAt = (x: number, y: number) => {
+		setBoard((prevBoard) => {
+			const newBoard: cellType[] = prevBoard.map((cell) => {
+				if (cell.x == x && cell.y == y) {
+					if (cell.type == 'wall') {
+						return { ...cell, type: 'empty' };
+					} else {
+						if (cell.type == 'start') setIsStartSet(false);
+						if (cell.type == 'finish') setIsFinishSet(false);
+						return { ...cell, type: 'wall' };
+					}
+				} else {
+					return cell;
+				}
+			});
+			return newBoard;
+		});
+		setChanged((changed) => !changed);
+	};
+
+	const setPointAt = (x: number, y: number) => {
+		let cellAlreadyExist = board.find((cell) => cell.type == action);
+		if (cellAlreadyExist) {
+			if (cellAlreadyExist.type == 'start') setIsStartSet(false);
+			if (cellAlreadyExist.type == 'finish') setIsFinishSet(false);
+		}
+		let oldX = cellAlreadyExist?.x;
+		let oldY = cellAlreadyExist?.y;
+		setBoard((prevBoard) => {
+			const newBoard: cellType[] = prevBoard.map((cell) => {
+				if (cell.x == x && cell.y == y) {
+					if (cell.type == 'finish' && action == 'start') setIsFinishSet(false);
+					if (cell.type == 'start' && action == 'finish') setIsStartSet(false);
+					if (action == 'start') setIsStartSet(true);
+					if (action == 'finish') setIsFinishSet(true);
+					return { ...cell, type: action };
+				} else if (cellAlreadyExist && cell.x == oldX && cell.y == oldY) {
+					return { ...cell, type: 'empty' };
+				} else {
+					return cell;
+				}
+			});
+			return newBoard;
+		});
+		setChanged((changed) => !changed);
+	};
+
+	const clearCellAt = (x: number, y: number) => {
+		setBoard((prevBoard) => {
+			const newBoard: cellType[] = prevBoard.map((cell) => {
+				if (cell.x == x && cell.y == y) {
+					if (cell.type == 'start') setIsStartSet(false);
+					if (cell.type == 'finish') setIsFinishSet(false);
+					return { ...cell, type: 'empty' };
+				} else {
+					return cell;
+				}
+			});
+			return newBoard;
+		});
+		setChanged((changed) => !changed);
+	};
+
+	return (
+		<div>
+			<div className="flex justify-center p-4 text-xl text-black">
+				<div className="mr-4">Set:</div>
+				<div className={`mr-4 cursor-pointer ${action == 'start' ? 'font-bold' : ''}`} onClick={() => setAction('start')}>
+					Start
+				</div>
+				<div className={`cursor-pointer ${action == 'finish' ? 'font-bold' : ''}`} onClick={() => setAction('finish')}>
+					Finish
+				</div>
+			</div>
+			<div className="grid grid-cols-15 gap-1" onContextMenu={(e) => e.preventDefault()}>
+				{board.map((cell, index) => (
+					<Cell key={index} cell={cell} setPointAt={setPointAt} setWallAt={setWallAt} clearCellAt={clearCellAt} />
+				))}
+			</div>
+		</div>
+	);
+};
+
+const Cell = ({
+	cell,
+	setWallAt,
+	setPointAt,
+	clearCellAt,
+}: {
+	cell: cellType;
+	setWallAt: (x: number, y: number) => void;
+	setPointAt: (x: number, y: number) => void;
+	clearCellAt: (x: number, y: number) => void;
+}) => {
+	return (
+		<div
+			onAuxClick={() => clearCellAt(cell.x, cell.y)}
+			onClick={() => setPointAt(cell.x, cell.y)}
+			onContextMenu={(e) => {
+				e.preventDefault();
+				setWallAt(cell.x, cell.y);
+			}}
+			className={`p-2 w-10 h-10 flex justify-center items-center border-2 border-black hover:cursor-pointer
+				${cell.type == 'wall' ? 'bg-slate-700' : ''}
+				${cell.type == 'start' ? 'bg-green-500' : ''}
+				${cell.type == 'finish' ? 'bg-blue-500' : ''}
+				${cell.type == 'path' ? 'bg-purple-600' : ''}
+				${cell.type == 'empty' ? 'bg-transparent' : ''}`}
+		></div>
+	);
+};
+
+export default Game;
