@@ -6,6 +6,7 @@ type cellType = {
 	x: number;
 	y: number;
 	type: 'wall' | 'empty' | 'path' | 'start' | 'finish';
+	number?: number;
 };
 
 const generateGridTemplate = (size: number) => {
@@ -35,6 +36,8 @@ const generateBoardTemplate = (size: number) => {
 
 const Game = () => {
 	const [mazeSize, setMazeSize] = useState(15);
+	const [pathLength, setPathLength] = useState(0);
+	const [isNoPath, setIsNoPath] = useState(false);
 
 	const [board, setBoard] = useState(generateBoardTemplate(mazeSize));
 	const [action, setAction] = useState<'finish' | 'start'>('start');
@@ -97,8 +100,11 @@ const Game = () => {
 		while (!ended) {
 			pathLevel = pathLevel + 1;
 
-			if (pathLevel > 100) {
+			if (pathLevel > mazeSize * mazeSize) {
 				ended = true;
+
+				setPathLength(0);
+				setIsNoPath(true);
 
 				setBoard((prevBoard) => {
 					const newBoard: cellType[] = prevBoard.map((cell) => {
@@ -235,6 +241,8 @@ const Game = () => {
 
 				if (pathRenderLevel == 0) {
 					pathRednerEnded = true;
+					setIsNoPath(false);
+					setPathLength(pathLevel);
 				}
 			}
 
@@ -254,6 +262,7 @@ const Game = () => {
 	};
 
 	const clearPath = () => {
+		setPathLength(0);
 		setBoard((prevBoard) => {
 			const newBoard: cellType[] = prevBoard.map((cell) => {
 				if (cell.type == 'path') {
@@ -270,13 +279,9 @@ const Game = () => {
 		setBoard((prevBoard) => {
 			const newBoard: cellType[] = prevBoard.map((cell) => {
 				if (cell.x == x && cell.y == y) {
-					if (cell.type == 'wall') {
-						return { ...cell, type: 'empty' };
-					} else {
-						if (cell.type == 'start') setIsStartSet(false);
-						if (cell.type == 'finish') setIsFinishSet(false);
-						return { ...cell, type: 'wall' };
-					}
+					if (cell.type == 'start') setIsStartSet(false);
+					if (cell.type == 'finish') setIsFinishSet(false);
+					return { ...cell, type: 'wall' };
 				} else {
 					return cell;
 				}
@@ -330,24 +335,47 @@ const Game = () => {
 	};
 
 	return (
-		<div>
-			<div className="flex justify-center p-4 text-xl text-black">
+		<div className="flex items-center flex-col">
+			<div className="flex items-center justify-center p-2 text-xl text-black">
 				<div className="mr-4">Set:</div>
-				<div className={`mr-4 cursor-pointer ${action == 'start' ? 'font-bold' : ''}`} onClick={() => setAction('start')}>
+				<button
+					className={`mr-4  p-2 rounded-md cursor-pointer hover:bg-neutral-200 font-semibold ${
+						action == 'start' ? 'bg-neutral-200' : 'bg-neutral-300'
+					}`}
+					onClick={() => setAction('start')}
+				>
 					Start
-				</div>
-				<div className={`cursor-pointer ${action == 'finish' ? 'font-bold' : ''}`} onClick={() => setAction('finish')}>
+				</button>
+				<button
+					className={`cursor-pointer p-2 rounded-md  font-semibold hover:bg-neutral-200 ${
+						action == 'finish' ? 'bg-neutral-200' : 'bg-neutral-300'
+					}`}
+					onClick={() => setAction('finish')}
+				>
 					Finish
-				</div>
+				</button>
 			</div>
-			<div className={`grid grid-cols-[repeat(${mazeSize},_minmax(0,_1fr))] gap-1`} onContextMenu={(e) => e.preventDefault()}>
+			<div className="flex justify-center p-2 text-lg text-black">
+				{isNoPath ? (
+					<div className="font-semibold text-red-700">There is no path!</div>
+				) : (
+					<div>
+						Path length: <span className="font-semibold">{pathLength}</span>
+					</div>
+				)}
+			</div>
+			<div
+				className={`grid gap-1 p-2`}
+				style={{ gridTemplateColumns: `repeat(${mazeSize}, minmax(0, 1fr))` }}
+				onContextMenu={(e) => e.preventDefault()}
+			>
 				{board.map((cell, index) => (
 					<Cell key={index} cell={cell} setPointAt={setPointAt} setWallAt={setWallAt} clearCellAt={clearCellAt} />
 				))}
 			</div>
-			<div className="flex justify-center p-4 text-md text-black">
+			<div className="flex justify-center p-4 text-base text-black">
 				<div className="mr-4">
-					<span className="font-semibold">Left click</span> to set start or finish
+					<span className="font-semibold">Left click</span> to set start or finish (slect above the board)
 				</div>
 				<div className="mr-4">
 					<span className="font-semibold">Middle click</span> to set wall
@@ -379,12 +407,19 @@ const Cell = ({
 				e.preventDefault();
 				setWallAt(cell.x, cell.y);
 			}}
-			className={`p-2 w-10 h-10 flex justify-center items-center border-2 border-black hover:cursor-pointer
+			onMouseEnter={(e) => {
+				if (e.buttons == 4) {
+					setWallAt(cell.x, cell.y);
+				} else if (e.buttons == 2) {
+					clearCellAt(cell.x, cell.y);
+				}
+			}}
+			className={`p-2 w-10 h-10 flex justify-center items-center border-2 hover:bg-opacity-50 border-black hover:cursor-pointer
 				${cell.type == 'wall' ? 'bg-slate-700' : ''}
 				${cell.type == 'start' ? 'bg-green-500' : ''}
 				${cell.type == 'finish' ? 'bg-blue-500' : ''}
 				${cell.type == 'path' ? 'bg-purple-600' : ''}
-				${cell.type == 'empty' ? 'bg-transparent' : ''}`}
+				${cell.type == 'empty' ? 'bg-neutral-400' : ''}`}
 		></div>
 	);
 };
