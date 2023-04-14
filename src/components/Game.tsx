@@ -210,25 +210,21 @@ const Game = () => {
 
 			while (!pathRednerEnded) {
 				if (grid[currnetY - 1] && grid[currnetY - 1][currnetX] == pathRenderLevel) {
-					//document.querySelector(`[x="${currnetX}"][y="${currnetY - 1}"]`).classList.add('path');
 					pathList.push({ x: currnetX, y: currnetY - 1 });
 					currnetX = currnetX;
 					currnetY = currnetY - 1;
 					pathRenderLevel--;
 				} else if (grid[currnetY + 1] && grid[currnetY + 1][currnetX] == pathRenderLevel) {
-					//document.querySelector(`[x="${currnetX}"][y="${currnetY + 1}"]`).classList.add('path');
 					pathList.push({ x: currnetX, y: currnetY + 1 });
 					currnetX = currnetX;
 					currnetY = currnetY + 1;
 					pathRenderLevel--;
 				} else if (grid[currnetY][currnetX - 1] == pathRenderLevel) {
-					//document.querySelector(`[x="${currnetX - 1}"][y="${currnetY}"]`).classList.add('path');
 					pathList.push({ x: currnetX - 1, y: currnetY });
 					currnetX = currnetX - 1;
 					currnetY = currnetY;
 					pathRenderLevel--;
 				} else if (grid[currnetY][currnetX + 1] == pathRenderLevel) {
-					//document.querySelector(`[x="${currnetX + 1}"][y="${currnetY}"]`).classList.add('path');
 					pathList.push({ x: currnetX + 1, y: currnetY });
 					currnetX = currnetX + 1;
 					currnetY = currnetY;
