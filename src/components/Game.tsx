@@ -8,34 +8,35 @@ type cellType = {
 	type: 'wall' | 'empty' | 'path' | 'start' | 'finish';
 };
 
-const gridTemplate: (string | number)[][] = [
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-];
+const generateGridTemplate = (size: number) => {
+	const gridTemplate: (string | number)[][] = [];
 
-const boardTemplate: cellType[] = [];
-
-for (let i = 0; i < 15; i++) {
-	for (let j = 0; j < 15; j++) {
-		boardTemplate.push({ y: i, x: j, type: 'empty' });
+	for (let i = 0; i < size; i++) {
+		gridTemplate.push([]);
+		for (let j = 0; j < size; j++) {
+			gridTemplate[i].push(0);
+		}
 	}
-}
+
+	return gridTemplate;
+};
+
+const generateBoardTemplate = (size: number) => {
+	const boardTemplate: cellType[] = [];
+
+	for (let i = 0; i < size; i++) {
+		for (let j = 0; j < size; j++) {
+			boardTemplate.push({ y: i, x: j, type: 'empty' });
+		}
+	}
+
+	return boardTemplate;
+};
 
 const Game = () => {
-	const [board, setBoard] = useState(boardTemplate);
+	const [mazeSize, setMazeSize] = useState(15);
+
+	const [board, setBoard] = useState(generateBoardTemplate(mazeSize));
 	const [action, setAction] = useState<'finish' | 'start'>('start');
 
 	const [changed, setChanged] = useState(false);
@@ -43,15 +44,24 @@ const Game = () => {
 	const [isStartSet, setIsStartSet] = useState(false);
 	const [isFinishSet, setIsFinishSet] = useState(false);
 
+	useEffect(() => {}, []);
+
 	useEffect(() => {
 		calculatePath();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [changed]);
 
+	useEffect(() => {
+		if (!isFinishSet || !isStartSet) {
+			clearPath();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isFinishSet, isStartSet]);
+
 	const calculatePath = () => {
 		if (!(isFinishSet && isStartSet)) return;
 
-		const grid = gridTemplate;
+		const grid = generateGridTemplate(mazeSize);
 
 		let endX: number = 0,
 			endY: number = 0;
@@ -104,8 +114,8 @@ const Game = () => {
 				failed = true;
 			}
 
-			for (let i = 0; i < 15; i++) {
-				for (let j = 0; j < 15; j++) {
+			for (let i = 0; i < mazeSize; i++) {
+				for (let j = 0; j < mazeSize; j++) {
 					if (pathLevel == 1) {
 						if (grid[i][j] == 'S') {
 							if (
@@ -243,6 +253,19 @@ const Game = () => {
 		}
 	};
 
+	const clearPath = () => {
+		setBoard((prevBoard) => {
+			const newBoard: cellType[] = prevBoard.map((cell) => {
+				if (cell.type == 'path') {
+					return { ...cell, type: 'empty' };
+				} else {
+					return cell;
+				}
+			});
+			return newBoard;
+		});
+	};
+
 	const setWallAt = (x: number, y: number) => {
 		setBoard((prevBoard) => {
 			const newBoard: cellType[] = prevBoard.map((cell) => {
@@ -317,10 +340,21 @@ const Game = () => {
 					Finish
 				</div>
 			</div>
-			<div className="grid grid-cols-15 gap-1" onContextMenu={(e) => e.preventDefault()}>
+			<div className={`grid grid-cols-[repeat(${mazeSize},_minmax(0,_1fr))] gap-1`} onContextMenu={(e) => e.preventDefault()}>
 				{board.map((cell, index) => (
 					<Cell key={index} cell={cell} setPointAt={setPointAt} setWallAt={setWallAt} clearCellAt={clearCellAt} />
 				))}
+			</div>
+			<div className="flex justify-center p-4 text-md text-black">
+				<div className="mr-4">
+					<span className="font-semibold">Left click</span> to set start or finish
+				</div>
+				<div className="mr-4">
+					<span className="font-semibold">Middle click</span> to set wall
+				</div>
+				<div className="mr-4">
+					<span className="font-semibold">Right click</span> to erease
+				</div>
 			</div>
 		</div>
 	);
@@ -339,9 +373,9 @@ const Cell = ({
 }) => {
 	return (
 		<div
-			onAuxClick={() => clearCellAt(cell.x, cell.y)}
+			onContextMenu={() => clearCellAt(cell.x, cell.y)}
 			onClick={() => setPointAt(cell.x, cell.y)}
-			onContextMenu={(e) => {
+			onAuxClick={(e) => {
 				e.preventDefault();
 				setWallAt(cell.x, cell.y);
 			}}
