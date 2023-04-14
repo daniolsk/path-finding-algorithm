@@ -327,34 +327,36 @@ const Game = () => {
 	};
 
 	return (
-		<div className="flex items-center flex-col">
-			<div className="flex items-center justify-center p-2 text-xl text-black">
-				<div className="mr-4">Set:</div>
-				<button
-					className={`mr-4  p-2 rounded-md cursor-pointer hover:bg-opacity-70 bg-green-500 font-semibold ${
-						action == 'start' ? 'bg-opacity-100' : 'bg-opacity-50'
-					}`}
-					onClick={() => setAction('start')}
-				>
-					Start
-				</button>
-				<button
-					className={`mr-4 cursor-pointer p-2 rounded-md  font-semibold hover:bg-opacity-70 bg-blue-500 ${
-						action == 'finish' ? 'bg-opacity-100' : 'bg-opacity-50'
-					}`}
-					onClick={() => setAction('finish')}
-				>
-					Finish
-				</button>
-			</div>
-			<div className="flex justify-center p-2 text-lg text-black">
-				{isNoPath ? (
-					<div className="font-semibold text-red-700">There is no path!</div>
-				) : (
-					<div>
-						Path length: <span className="font-semibold">{pathLength}</span>
-					</div>
-				)}
+		<div className="flex items-center flex-col justify-between">
+			<div className="flex p-4 items-center justify-between self-stretch">
+				<div className="flex items-center text-base text-black">
+					<div className="mr-4">Set:</div>
+					<button
+						className={`border-2 border-black mr-4  py-1 px-2 rounded-md cursor-pointer hover:bg-opacity-70 bg-green-500 font-semibold ${
+							action == 'start' ? 'bg-opacity-100' : 'opacity-60'
+						}`}
+						onClick={() => setAction('start')}
+					>
+						Start
+					</button>
+					<button
+						className={`border-2 border-black mr-4 cursor-pointer py-1 px-2 rounded-md font-semibold hover:bg-opacity-70 bg-blue-500 ${
+							action == 'finish' ? 'bg-opacity-100' : 'opacity-60'
+						}`}
+						onClick={() => setAction('finish')}
+					>
+						Finish
+					</button>
+				</div>
+				<div className="flex text-lg text-black">
+					{isNoPath ? (
+						<div className="font-semibold text-red-700">There is no path!</div>
+					) : (
+						<div>
+							Path length: <span className="font-semibold">{pathLength}</span>
+						</div>
+					)}
+				</div>
 			</div>
 			<div
 				className={`grid gap-1 p-2`}
@@ -373,10 +375,10 @@ const Game = () => {
 					<span className="font-semibold">Left click</span> to set start or finish (slect above the board)
 				</div>
 				<div className="mr-4">
-					<span className="font-semibold">Middle click</span> to set wall
+					<span className="font-semibold">Right click</span> to set wall
 				</div>
 				<div className="mr-4">
-					<span className="font-semibold">Right click</span> to erease
+					<span className="font-semibold">Middle click</span> to erease
 				</div>
 			</div>
 		</div>

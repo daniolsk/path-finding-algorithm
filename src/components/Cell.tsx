@@ -15,9 +15,9 @@ const Cell = ({
 }) => {
 	return (
 		<div
-			onContextMenu={() => clearCellAt(cell.x, cell.y)}
+			onAuxClick={() => clearCellAt(cell.x, cell.y)}
 			onClick={() => setPointAt(cell.x, cell.y)}
-			onAuxClick={(e) => {
+			onContextMenu={(e) => {
 				e.preventDefault();
 				setWallAt(cell.x, cell.y);
 			}}
