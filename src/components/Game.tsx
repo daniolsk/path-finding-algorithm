@@ -327,21 +327,21 @@ const Game = () => {
 	};
 
 	return (
-		<div className="flex items-center flex-col justify-between">
+		<div className="flex items-center flex-col justify-around">
 			<div className="flex p-4 items-center justify-between self-stretch">
 				<div className="flex items-center text-base text-white">
 					<div className="mr-4">Set:</div>
 					<button
-						className={`border-2 border-black mr-4  py-1 px-2 rounded-md cursor-pointer hover:bg-opacity-70 bg-green-600 font-semibold ${
-							action == 'start' ? 'bg-opacity-100' : 'opacity-60'
+						className={`border-2 border-black mr-4  py-1 px-2 rounded-md cursor-pointer hover:bg-green-500 bg-green-600 font-medium ${
+							action == 'start' ? 'bg-green-600' : 'bg-green-700'
 						}`}
 						onClick={() => setAction('start')}
 					>
 						Start
 					</button>
 					<button
-						className={`border-2 border-black mr-4 cursor-pointer py-1 px-2 rounded-md font-semibold hover:bg-opacity-70 bg-blue-600 ${
-							action == 'finish' ? 'bg-opacity-100' : 'opacity-60'
+						className={`border-2 border-black mr-4 cursor-pointer py-1 px-2 rounded-md font-medium hover:bg-blue-500 bg-blue-600 ${
+							action == 'finish' ? 'bg-blue-600' : 'bg-blue-700'
 						}`}
 						onClick={() => setAction('finish')}
 					>
@@ -370,7 +370,7 @@ const Game = () => {
 					<Cell key={index} cell={cell} setPointAt={setPointAt} setWallAt={setWallAt} clearCellAt={clearCellAt} />
 				))}
 			</div>
-			<div className="flex justify-center p-4 text-base text-white">
+			<div className="hidden justify-center p-4 text-base text-white md:flex">
 				<div className="mr-4">
 					<span className="font-semibold">Left click</span> to set start or finish (slect above the board)
 				</div>

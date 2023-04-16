@@ -35,7 +35,7 @@ const Cell = ({
 					clearCellAt(cell.x, cell.y);
 				}
 			}}
-			className={`p-2 flex justify-center items-center border-2 hover:bg-opacity-50 border-black hover:cursor-pointer
+			className={`p-2 flex justify-center items-center border-2 hover:bg-opacity-80 border-black hover:cursor-pointer
 				${cell.type == 'wall' ? 'bg-slate-700' : ''}
 				${cell.type == 'start' ? 'bg-green-500' : ''}
 				${cell.type == 'finish' ? 'bg-blue-500' : ''}
