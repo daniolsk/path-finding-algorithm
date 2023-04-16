@@ -1,6 +1,6 @@
 'use client';
 
-import { type cellType } from '../lib/types';
+import { type cellType } from '../utils/types';
 
 const Cell = ({
 	cell,

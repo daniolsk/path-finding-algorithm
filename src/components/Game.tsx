@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { type cellType } from '../lib/types';
+import { type cellType } from '../utils/types';
 import Cell from './Cell';
 
 const generateGridTemplate = (size: number) => {
@@ -329,10 +329,10 @@ const Game = () => {
 	return (
 		<div className="flex items-center flex-col justify-between">
 			<div className="flex p-4 items-center justify-between self-stretch">
-				<div className="flex items-center text-base text-black">
+				<div className="flex items-center text-base text-white">
 					<div className="mr-4">Set:</div>
 					<button
-						className={`border-2 border-black mr-4  py-1 px-2 rounded-md cursor-pointer hover:bg-opacity-70 bg-green-500 font-semibold ${
+						className={`border-2 border-black mr-4  py-1 px-2 rounded-md cursor-pointer hover:bg-opacity-70 bg-green-600 font-semibold ${
 							action == 'start' ? 'bg-opacity-100' : 'opacity-60'
 						}`}
 						onClick={() => setAction('start')}
@@ -340,7 +340,7 @@ const Game = () => {
 						Start
 					</button>
 					<button
-						className={`border-2 border-black mr-4 cursor-pointer py-1 px-2 rounded-md font-semibold hover:bg-opacity-70 bg-blue-500 ${
+						className={`border-2 border-black mr-4 cursor-pointer py-1 px-2 rounded-md font-semibold hover:bg-opacity-70 bg-blue-600 ${
 							action == 'finish' ? 'bg-opacity-100' : 'opacity-60'
 						}`}
 						onClick={() => setAction('finish')}
@@ -348,7 +348,7 @@ const Game = () => {
 						Finish
 					</button>
 				</div>
-				<div className="flex text-lg text-black">
+				<div className="flex text-lg text-white">
 					{isNoPath ? (
 						<div className="font-semibold text-red-700">There is no path!</div>
 					) : (
@@ -370,7 +370,7 @@ const Game = () => {
 					<Cell key={index} cell={cell} setPointAt={setPointAt} setWallAt={setWallAt} clearCellAt={clearCellAt} />
 				))}
 			</div>
-			<div className="flex justify-center p-4 text-base text-black">
+			<div className="flex justify-center p-4 text-base text-white">
 				<div className="mr-4">
 					<span className="font-semibold">Left click</span> to set start or finish (slect above the board)
 				</div>
