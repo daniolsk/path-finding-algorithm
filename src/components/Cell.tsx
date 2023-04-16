@@ -22,16 +22,16 @@ const Cell = ({
 				setWallAt(cell.x, cell.y);
 			}}
 			onMouseDown={(e) => {
-				if (e.buttons == 4) {
+				if (e.buttons == 2) {
 					setWallAt(cell.x, cell.y);
-				} else if (e.buttons == 2) {
+				} else if (e.buttons == 4) {
 					clearCellAt(cell.x, cell.y);
 				}
 			}}
 			onMouseEnter={(e) => {
-				if (e.buttons == 4) {
+				if (e.buttons == 2) {
 					setWallAt(cell.x, cell.y);
-				} else if (e.buttons == 2) {
+				} else if (e.buttons == 4) {
 					clearCellAt(cell.x, cell.y);
 				}
 			}}
